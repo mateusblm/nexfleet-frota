@@ -7,6 +7,8 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 import br.com.nexfleet.frota.gerenciarvinculos.application.*;
 import br.com.nexfleet.frota.infrastructure.IndicesMongo;
+import br.com.nexfleet.frota.motorista.domain.StatusMotorista;
+import br.com.nexfleet.frota.veiculo.domain.StatusVeiculo;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,8 +32,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MongoVinculos implements Vinculos {
   private static final Sort ORDEM = Sort.by(Sort.Order.desc("inicio"), Sort.Order.asc("_id"));
-  private static final String STATUS_VEICULO_INATIVO = "INATIVO";
-  private static final String STATUS_MOTORISTA_ATIVO = "ATIVO";
+  private static final String STATUS_VEICULO_INATIVO = StatusVeiculo.INATIVO.name();
+  private static final String STATUS_MOTORISTA_ATIVO = StatusMotorista.ATIVO.name();
 
   private final MongoTemplate mongo;
   private final IndicesMongo indices;
