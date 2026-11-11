@@ -77,6 +77,34 @@ class GerenciarVeiculosTest {
             .tipo());
   }
 
+  @Test
+  void excluiSomenteInativoSemHistorico() {
+    when(repositorio.excluir(id))
+        .thenReturn(
+            Veiculos.Exclusao.EXCLUIDO,
+            Veiculos.Exclusao.NAO_INATIVO,
+            Veiculos.Exclusao.COM_HISTORICO,
+            Veiculos.Exclusao.NAO_ENCONTRADO);
+    assertDoesNotThrow(() -> caso.excluir("GESTOR_FROTA", autor, id));
+    assertEquals(
+        INVALIDO,
+        assertThrows(FalhaVeiculo.class, () -> caso.excluir("GESTOR_FROTA", autor, id)).tipo());
+    assertEquals(
+        CONFLITO,
+        assertThrows(FalhaVeiculo.class, () -> caso.excluir("GESTOR_FROTA", autor, id)).tipo());
+    assertEquals(
+        NAO_ENCONTRADO,
+        assertThrows(FalhaVeiculo.class, () -> caso.excluir("GESTOR_FROTA", autor, id)).tipo());
+  }
+
+  @Test
+  void exclusaoRecusaPerfilSemAcessoSemTocarNoBanco() {
+    assertEquals(
+        PROIBIDO,
+        assertThrows(FalhaVeiculo.class, () -> caso.excluir("OUTRO", autor, id)).tipo());
+    verifyNoInteractions(repositorio);
+  }
+
   private Veiculos.Dados dados(br.com.nexfleet.frota.veiculo.domain.StatusVeiculo status) {
     return new Veiculos.Dados(
         id, "ABC1D23", "Volkswagen", "Delivery", 2025, "Caminhão", 1200,

@@ -4,6 +4,7 @@ import br.com.nexfleet.frota.gerenciarmotoristas.application.*;
 import br.com.nexfleet.frota.motorista.domain.StatusMotorista;
 import java.time.*;
 import java.util.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
@@ -121,6 +122,23 @@ public class JdbcMotoristas implements Motoristas {
     } catch (DuplicateKeyException e) {
       throw duplicado();
     }
+  }
+
+  @Override
+  public Exclusao excluir(UUID id) {
+    try {
+      int apagados =
+          jdbc.update(
+              "DELETE FROM frota.motorista m WHERE m.id=? AND m.status='INATIVO' AND NOT EXISTS "
+                  + "(SELECT 1 FROM frota.veiculo_motorista vm WHERE vm.motorista_id=m.id)",
+              id);
+      if (apagados == 1) return Exclusao.EXCLUIDO;
+    } catch (DataIntegrityViolationException e) {
+      return Exclusao.COM_HISTORICO;
+    }
+    return buscar(id)
+        .map(m -> m.status() == StatusMotorista.INATIVO ? Exclusao.COM_HISTORICO : Exclusao.NAO_INATIVO)
+        .orElse(Exclusao.NAO_ENCONTRADO);
   }
 
   private static FalhaMotorista duplicado() {

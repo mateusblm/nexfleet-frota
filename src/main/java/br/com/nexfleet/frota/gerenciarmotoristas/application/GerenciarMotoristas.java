@@ -69,6 +69,24 @@ public class GerenciarMotoristas {
         .orElseThrow(GerenciarMotoristas::naoEncontrado);
   }
 
+  /**
+   * Exclusão definitiva (ADR 0038): somente motorista INATIVO e sem vínculos. Todo abastecimento
+   * exige vínculo, então "sem vínculos" significa "sem histórico operacional".
+   */
+  public void excluir(String perfil, UUID autor, UUID id) {
+    autorizar(perfil);
+    validarAutor(autor);
+    switch (motoristas.excluir(id)) {
+      case EXCLUIDO -> {}
+      case NAO_ENCONTRADO -> throw naoEncontrado();
+      case NAO_INATIVO -> throw invalido("Inative o motorista antes de excluí-lo.");
+      case COM_HISTORICO ->
+          throw new FalhaMotorista(
+              CONFLITO,
+              "O motorista possui histórico e não pode ser excluído. Mantenha-o inativo.");
+    }
+  }
+
   private static Entrada validar(Entrada entrada) {
     if (entrada == null) throw invalido("Informe os dados do motorista.");
     var nome = texto(entrada.nome(), 120, "nome");

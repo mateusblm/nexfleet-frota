@@ -4,6 +4,7 @@ import br.com.nexfleet.frota.gerenciarveiculos.application.*;
 import br.com.nexfleet.frota.veiculo.domain.StatusVeiculo;
 import java.time.*;
 import java.util.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
@@ -135,6 +136,25 @@ public class JdbcVeiculos implements Veiculos {
             autor,
             id)
         == 1;
+  }
+
+  @Override
+  public Exclusao excluir(UUID id) {
+    try {
+      // Um único comando: apaga só se estiver inativo e sem vínculos (sem corrida entre checar e
+      // apagar). A FK de veiculo_motorista ainda protege contra um vínculo criado no meio.
+      int apagados =
+          jdbc.update(
+              "DELETE FROM frota.veiculo v WHERE v.id=? AND v.status='INATIVO' AND NOT EXISTS "
+                  + "(SELECT 1 FROM frota.veiculo_motorista vm WHERE vm.veiculo_id=v.id)",
+              id);
+      if (apagados == 1) return Exclusao.EXCLUIDO;
+    } catch (DataIntegrityViolationException e) {
+      return Exclusao.COM_HISTORICO;
+    }
+    return buscar(id)
+        .map(v -> v.status() == StatusVeiculo.INATIVO ? Exclusao.COM_HISTORICO : Exclusao.NAO_INATIVO)
+        .orElse(Exclusao.NAO_ENCONTRADO);
   }
 
   private static FalhaVeiculo duplicado() {

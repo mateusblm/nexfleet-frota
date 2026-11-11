@@ -57,6 +57,12 @@ public class VeiculosController {
     return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
   }
 
+  @DeleteMapping("/{id}/definitivo")
+  public ResponseEntity<Void> excluir(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
+    veiculos.excluir(perfil(jwt), autor(jwt), id);
+    return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+  }
+
   private String perfil(Jwt jwt) {
     return jwt == null ? null : jwt.getClaimAsString("perfil");
   }

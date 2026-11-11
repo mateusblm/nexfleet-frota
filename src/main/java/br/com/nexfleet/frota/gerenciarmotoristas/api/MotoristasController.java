@@ -50,6 +50,12 @@ public class MotoristasController {
     return semCache(motoristas.atualizar(perfil(jwt), autor(jwt), id, entrada));
   }
 
+  @DeleteMapping("/{id}/definitivo")
+  public ResponseEntity<Void> excluir(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
+    motoristas.excluir(perfil(jwt), autor(jwt), id);
+    return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+  }
+
   private String perfil(Jwt jwt) {
     return jwt == null ? null : jwt.getClaimAsString("perfil");
   }

@@ -42,4 +42,14 @@ public interface Motoristas {
       String telefone,
       StatusMotorista status,
       UUID autor);
+
+  /** Resultado da exclusão definitiva: só ocorre para motorista inativo e sem vínculos. */
+  enum Exclusao {
+    EXCLUIDO,
+    NAO_ENCONTRADO,
+    NAO_INATIVO,
+    COM_HISTORICO
+  }
+
+  Exclusao excluir(UUID id);
 }

@@ -77,6 +77,24 @@ public class GerenciarVeiculos {
     if (!veiculos.inativar(id, autor)) throw naoEncontrado();
   }
 
+  /**
+   * Exclusão definitiva (ADR 0038): somente veículo INATIVO e sem histórico. Com histórico o
+   * cadastro é preservado para manter o CQ05; o usuário deve mantê-lo inativo.
+   */
+  public void excluir(String perfil, UUID autor, UUID id) {
+    autorizar(perfil);
+    validarAutor(autor);
+    switch (veiculos.excluir(id)) {
+      case EXCLUIDO -> {}
+      case NAO_ENCONTRADO -> throw naoEncontrado();
+      case NAO_INATIVO -> throw invalido("Inative o veículo antes de excluí-lo.");
+      case COM_HISTORICO ->
+          throw new FalhaVeiculo(
+              CONFLITO,
+              "O veículo possui histórico e não pode ser excluído. Mantenha-o inativo.");
+    }
+  }
+
   private static Entrada validar(Entrada entrada) {
     if (entrada == null) throw invalido("Informe os dados do veículo.");
     var placa = texto(entrada.placa(), 10, "placa").toUpperCase(Locale.ROOT);

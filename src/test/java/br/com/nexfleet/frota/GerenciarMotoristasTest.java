@@ -93,6 +93,26 @@ class GerenciarMotoristasTest {
             .tipo());
   }
 
+  @Test
+  void excluiSomenteInativoSemHistorico() {
+    when(repositorio.excluir(id))
+        .thenReturn(
+            Motoristas.Exclusao.EXCLUIDO,
+            Motoristas.Exclusao.NAO_INATIVO,
+            Motoristas.Exclusao.COM_HISTORICO,
+            Motoristas.Exclusao.NAO_ENCONTRADO);
+    assertDoesNotThrow(() -> caso.excluir("ADMINISTRADOR", autor, id));
+    assertEquals(
+        INVALIDO,
+        assertThrows(FalhaMotorista.class, () -> caso.excluir("ADMINISTRADOR", autor, id)).tipo());
+    assertEquals(
+        CONFLITO,
+        assertThrows(FalhaMotorista.class, () -> caso.excluir("ADMINISTRADOR", autor, id)).tipo());
+    assertEquals(
+        NAO_ENCONTRADO,
+        assertThrows(FalhaMotorista.class, () -> caso.excluir("ADMINISTRADOR", autor, id)).tipo());
+  }
+
   private Motoristas.Dados dados(
       br.com.nexfleet.frota.motorista.domain.StatusMotorista status) {
     return new Motoristas.Dados(
