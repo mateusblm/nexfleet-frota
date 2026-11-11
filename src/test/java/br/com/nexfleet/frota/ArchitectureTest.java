@@ -51,6 +51,17 @@ class ArchitectureTest {
   }
 
   @Test
+  void mongoSoEmInfraestrutura() {
+    noClasses()
+        .that()
+        .resideOutsideOfPackage("..infrastructure..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("org.springframework.data.mongodb..", "com.mongodb..", "org.bson..")
+        .check(classes);
+  }
+
+  @Test
   void dominioNaoDependeDeFrameworkOuCamadasExternas() {
     noClasses()
         .that()

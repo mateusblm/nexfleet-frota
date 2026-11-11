@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
     properties = {
       "spring.mongodb.uri=mongodb://127.0.0.1:1/frota?serverSelectionTimeoutMS=300&connectTimeoutMS=300",
       "spring.datasource.url=jdbc:postgresql://127.0.0.1:1/indisponivel",
+      "spring.datasource.username=indisponivel",
+      "spring.datasource.password=indisponivel",
       "spring.flyway.enabled=false"
     })
 @AutoConfigureMockMvc

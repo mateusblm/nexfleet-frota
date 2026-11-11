@@ -24,6 +24,8 @@ import org.testcontainers.mongodb.MongoDBContainer;
     properties = {
       // Motoristas e vínculos ainda são JDBC (ticket 11); o banco relacional não é exercitado aqui.
       "spring.datasource.url=jdbc:postgresql://127.0.0.1:1/indisponivel",
+      "spring.datasource.username=indisponivel",
+      "spring.datasource.password=indisponivel",
       "spring.flyway.enabled=false"
     })
 @AutoConfigureMockMvc
