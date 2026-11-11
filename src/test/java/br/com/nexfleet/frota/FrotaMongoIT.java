@@ -22,11 +22,6 @@ import org.testcontainers.mongodb.MongoDBContainer;
 /** Serviço inteiro sobre MongoDB real: índices na inicialização, 409 de placa e readiness. */
 @SpringBootTest(
     properties = {
-      // Motoristas e vínculos ainda são JDBC (ticket 11); o banco relacional não é exercitado aqui.
-      "spring.datasource.url=jdbc:postgresql://127.0.0.1:1/indisponivel",
-      "spring.datasource.username=indisponivel",
-      "spring.datasource.password=indisponivel",
-      "spring.flyway.enabled=false"
     })
 @AutoConfigureMockMvc
 @ActiveProfiles("jwt-rsa")

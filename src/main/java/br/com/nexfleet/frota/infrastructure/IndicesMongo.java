@@ -9,6 +9,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
+import org.springframework.data.mongodb.core.index.PartialIndexFilter;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IndicesMongo implements ApplicationRunner {
   public static final String VEICULOS = "veiculos";
+  public static final String MOTORISTAS = "motoristas";
   public static final String VINCULOS = "vinculos";
 
   private static final Logger log = LoggerFactory.getLogger(IndicesMongo.class);
@@ -52,6 +55,34 @@ public class IndicesMongo implements ApplicationRunner {
                 .on("status", Sort.Direction.ASC)
                 .on("placa", Sort.Direction.ASC)
                 .named("ix_veiculo_status_placa"));
+    var motoristas = mongo.indexOps(MOTORISTAS);
+    motoristas.createIndex(
+        new Index().on("cpf", Sort.Direction.ASC).named("ux_motorista_cpf").unique());
+    motoristas.createIndex(
+        new Index().on("cnh", Sort.Direction.ASC).named("ux_motorista_cnh").unique());
+    motoristas.createIndex(
+        new Index()
+            .on("status", Sort.Direction.ASC)
+            .on("nome", Sort.Direction.ASC)
+            .named("ix_motorista_status_nome"));
+    var vinculos = mongo.indexOps(VINCULOS);
+    // No máximo um vínculo ativo por veículo (RB06), garantido pelo banco mesmo sob corrida.
+    vinculos.createIndex(
+        new Index()
+            .on("veiculoId", Sort.Direction.ASC)
+            .named("ux_vinculo_veiculo_ativo")
+            .unique()
+            .partial(PartialIndexFilter.of(Criteria.where("ativo").is(true))));
+    vinculos.createIndex(
+        new Index()
+            .on("veiculoId", Sort.Direction.ASC)
+            .on("inicio", Sort.Direction.DESC)
+            .named("ix_vinculo_historico_veiculo"));
+    vinculos.createIndex(
+        new Index()
+            .on("motoristaId", Sort.Direction.ASC)
+            .on("inicio", Sort.Direction.DESC)
+            .named("ix_vinculo_historico_motorista"));
     garantidos.set(true);
   }
 }
